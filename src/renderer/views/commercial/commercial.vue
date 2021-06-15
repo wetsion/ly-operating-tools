@@ -7,16 +7,17 @@
     <p>
       
     </p>
-    <div ref="commercialChart" style="width: 100%;height: 600px"></div>
+    <div ref="commercialChart" style="width: 90%;height: 800px"></div>
+    <p></p>
   </div>
 </template>
 
 <script>
   import XLSX from 'xlsx'
   import moment from 'moment'
-  import {GridComponent} from 'echarts/components'
+  import {GridComponent, TitleComponent, ToolboxComponent, TooltipComponent, LegendComponent} from 'echarts/components'
   let Echarts = require('echarts/lib/echarts')
-  Echarts.use([GridComponent])
+  Echarts.use([GridComponent, TitleComponent, ToolboxComponent, TooltipComponent, LegendComponent])
   require('echarts/lib/chart/bar')
 
   export default {
@@ -24,8 +25,8 @@
     data () {
       return {
         loading: false,
-        dateXAxis: [ "衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子" ],
-        chartData: [5, 20, 36, 10, 10, 20],
+        dateXAxis: [],
+        chartData: [],
         chartSeries: []
       }
     },
@@ -37,16 +38,36 @@
         this.$router.push('/dashboard')
       },
       drawCommercialChart (xAxisData, seriesData) {
-        var colors = ['#5793f3', '#d14a61', '#675bba'];
+        let colors = ['#5793f3', '#d14a61', '#675bba'];
         let myChart = Echarts.init(this.$refs.commercialChart)
         myChart.setOption({
           title: {
             text: '广告数据'
           },
-          width: 600,
-          height: 500,
-          tooltip: {},
-          xAxis: {
+          width: 'auto',
+          height: 'auto',
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          toolbox: {
+            show: true,
+            orient: 'vertical',
+            left: 'right',
+            top: 'top',
+            feature: {
+              saveAsImage: {show: true}
+            }
+          },
+          legend: {
+            orient: 'vertical',
+            left: 'right',
+            top: 'middle',
+            data: ['曝光量', '点击率', '花费', '销售额', 'ACOS']
+          },
+          yAxis: {
             type: 'category',
             axisLabel: {
               interval: 0,
@@ -54,13 +75,14 @@
             },
             data: xAxisData
           },
-          yAxis: [
+          xAxis: [
             {
               type: 'value',
               name: '曝光量',
               // min: 0,
               // max: 20000,
-              position: 'left',
+              position: 'top',
+              offset: 0,
               axisLine: {
                 lineStyle: {
                   color: colors[0]
@@ -75,10 +97,11 @@
               name: '点击率',
               // min: 0,
               // max: 100,
-              position: 'right',
+              position: 'top',
+              offset: 20,
               axisLine: {
                 lineStyle: {
-                  color: colors[0]
+                  color: colors[1]
                 }
               },
               axisLabel: {
@@ -88,11 +111,11 @@
             {
               type: 'value',
               name: '花费',
-              position: 'right',
-              offset: 40,
+              position: 'bottom',
+              offset: 0,
               axisLine: {
                 lineStyle: {
-                  color: colors[0]
+                  color: colors[2]
                 }
               },
               axisLabel: {
@@ -102,8 +125,8 @@
             {
               type: 'value',
               name: '销售额',
-              position: 'right',
-              offset: 80,
+              position: 'bottom',
+              offset: 20,
               axisLine: {
                 lineStyle: {
                   color: colors[0]
@@ -118,11 +141,11 @@
               name: 'ACOS',
               // min: 0,
               // max: 100,
-              position: 'right',
-              offset: 120,
+              position: 'bottom',
+              offset: 40,
               axisLine: {
                 lineStyle: {
-                  color: colors[0]
+                  color: colors[1]
                 }
               },
               axisLabel: {
@@ -154,12 +177,7 @@
           let sheetList = workbook.SheetNames
           console.log(sheetList)
           sheetList.forEach((name) => {
-            let worksheet = workbook.Sheets[name]; // 只能通过工作表名称来获取指定工作表
-            // for (let key in worksheet) {
-            //     // v是读取单元格的原始值
-            //     console.log(key, key[0] === '!' ? worksheet[key] : worksheet[key].v);
-            // }
-            // uploadData.push(JSON.stringify(worksheet));
+            let worksheet = workbook.Sheets[name]
             uploadData.push(XLSX.utils.sheet_to_json(worksheet));
           })
           console.log(uploadData)
@@ -198,10 +216,10 @@
         for (var i = 0; i < sheet1List.length; i++) {
           let row = sheet1List[i]
           baoguangliang.push(row['曝光量'])
-          ctr.push(Number.parseFloat(row['点击率 (CTR)']) * 100)
+          ctr.push((row['点击率 (CTR)'] * 10000)/100)
           cost.push(row['花费(USD)'])
           sells.push(row['销售额(USD)'])
-          acos.push(row['ACOS'])
+          acos.push((row['ACOS'] * 10000)/100)
         }
         let labelOption = {
             show: true,
@@ -223,35 +241,54 @@
             name: '曝光量',
             type: 'bar',
             barGap: 0,
+            emphasis: {
+              focus: 'series'
+            },
             // label: labelOption,
             data: baoguangliang
           },
           {
             name: '点击率',
             type: 'bar',
+            emphasis: {
+              focus: 'series'
+            },
             // label: labelOption,
-            yAxisIndex: 1,
+            // yAxisIndex: 1,
+            xAxisIndex: 1,
             data: ctr
           },
           {
             name: '花费',
             type: 'bar',
+            emphasis: {
+              focus: 'series'
+            },
             // label: labelOption,
-            yAxisIndex: 2,
+            // yAxisIndex: 2,
+            xAxisIndex: 2,
             data: cost
           },
           {
             name: '销售额',
             type: 'bar',
+            emphasis: {
+              focus: 'series'
+            },
             // label: labelOption,
-            yAxisIndex: 3,
+            // yAxisIndex: 3,
+            xAxisIndex: 3,
             data: sells
           },
           {
             name: 'ACOS',
             type: 'bar',
+            emphasis: {
+              focus: 'series'
+            },
             // label: labelOption,
-            yAxisIndex: 4,
+            // yAxisIndex: 4,
+            xAxisIndex: 4,
             data: acos
           }
         ]
