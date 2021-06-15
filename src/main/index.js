@@ -25,7 +25,7 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    title: '秋月编辑器',
+    title: '刘颖的运营工具',
     height: 600,
     useContentSize: true,
     width: 1000,
@@ -114,13 +114,13 @@ app.on('ready', () => {
     {
       submenu: [
         {
-          label: '关于秋月编辑器',
+          label: '关于刘颖的运营工具',
           click (event, focusedWindow, focusedWebContents) {
             if (aboutWindow) {
               aboutWindow.show()
             } else {
               aboutWindow = new BrowserWindow({
-                title: '关于秋月编辑器',
+                title: '关于刘颖的运营工具',
                 height: 400,
                 useContentSize: true,
                 width: 300,

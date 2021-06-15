@@ -7,7 +7,8 @@
     <p>
       
     </p>
-    <div ref="commercialChart" style="width: 90%;height: 800px"></div>
+    <div ref="commercialChart" style="width: 90%;height: 800px" v-loading="loading"
+         element-loading-text="文件读取中"></div>
     <p></p>
   </div>
 </template>
@@ -31,7 +32,7 @@
       }
     },
     mounted () {
-      this.drawCommercialChart(this.dateXAxis, this.chartSeries)
+      // this.drawCommercialChart(this.dateXAxis, this.chartSeries)
     },
     methods: {
       back () {
@@ -159,7 +160,16 @@
       implUserExcel (e) {
         // let loading = this.openLoading()
         console.log('excel')
-        let fileName = e.target.files[0]
+        this.openLoading()
+        setTimeout(() => {
+          this.readExcel(e.target.files[0])
+        }, 1000)
+
+      },
+      openLoading () {
+        this.loading = true
+      },
+      readExcel (fileName) {
         console.log(fileName)
         if (!fileName) {
           // this.closeLoading(loading)
@@ -181,7 +191,7 @@
             uploadData.push(XLSX.utils.sheet_to_json(worksheet));
           })
           console.log(uploadData)
-          
+
           this.drawCommercialChart(this.buildXAxiasData(uploadData), this.buildSeriesData(uploadData))
         }
         reader.onloadend = () => {
@@ -296,18 +306,10 @@
       },
       openLoading () {
         console.log('open loading')
-        // const loading = this.$loading({
-        //   lock: true,
-        //   text: 'Loading',
-        //   spinner: 'el-icon-loading',
-        //   background: 'rgba(0, 0, 0, 0.7)'
-        // })
-        // return loading
         this.loading = true
       },
       closeLoading () {
         console.log('close loading')
-        // loading.close();
         this.loading = false
       }
     }
